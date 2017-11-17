@@ -1,6 +1,7 @@
 # Hajautetut ohjelmistojärjestelmät ja pilvipalvelut -kurssin harjoitustyö nro. 1
 
-## Eclipse-projekti, DL 10.12.2017
+## Java-projekti, käytetty Eclipseä.  
+## DL 10.12.2017
 
 ### Tehtävänä on tehdä sovellus X, joka tarjoaa lukujen summauspalvelua erikseen määritellyn palvelimen Y käyttöön. Palvelin Y on valmiiksi toteutettu ja sen yhteyteen on määritelty protokolla, jonka avulla summauspalvelua tarjoava sovellus X voi ottaa siihen yhteyttä. 
 
