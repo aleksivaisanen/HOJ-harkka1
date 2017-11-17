@@ -7,16 +7,11 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
+
 
 public class SumClient {
 	
 	public static void main(String[] args) throws Exception {
-		//m‰‰ritell‰‰n kolme linkedblockingqueueta, joiden v‰lill‰ threadit pystyv‰t vaihtamaan tietoa
-		
-		
-		
 		//m‰‰ritell‰‰n osoitteet ja portit sek‰ l‰hetet‰‰n ensimm‰inen paketti serverille
 		InetAddress targetAddr = InetAddress.getLoopbackAddress();
 		int targetPort = 3126;
@@ -24,11 +19,12 @@ public class SumClient {
 		//satunnainen vapaa portti, t‰ss‰ tapauksessa valittiin 51873
 		int localPort = 51873;
 		byte[] data = Integer.toString(localPort).getBytes();	
+		//m‰‰ritell‰‰n paketti ja l‰hetet‰‰n
 		DatagramPacket packet = new DatagramPacket (data, data.length, targetAddr, targetPort);
 		socket.send(packet);
 		socket.close();
 		
-		//yritet‰‰n avataan soketti clientin ja serverin v‰lille, sek‰ avataan streamit
+		//sokettien ja input/outputtien m‰‰rittelyt
 		ServerSocket sSocket = null;
 		Socket clientSocket = null;
 		InputStream iS = null;
@@ -42,6 +38,7 @@ public class SumClient {
 		
 		for(int i=1; i<6; i++) {
 			try {
+				//avataan soketti 
 				sSocket = new ServerSocket(localPort);
 				clientSocket = sSocket.accept();
 				System.out.println("Connection established");
@@ -96,7 +93,7 @@ public class SumClient {
 			catch(Exception e){
 				e.printStackTrace();
 				System.out.println("\nWaiting for number t "+(5-i)+ " seconds.");
-				//tarkistetaan onko jo odotettu 5 sekuntia, jos on niin palautetaan serverille -1 ja suljetaan ohjelma
+				//tarkistetaan onko jo odotettu 5 sekuntia ja jos on, niin palautetaan serverille -1 ja suljetaan ohjelma
 				if(i==5) {
 					System.out.println("Didn't receive number t, shutting down the client");
 					oOut.writeInt(-1);
@@ -116,10 +113,14 @@ public class SumClient {
 		//t‰h‰n talletetaan jokaisen threadin sille v‰litettyjen numeroiden kokonaism‰‰r‰;
 		int[] numberOfNumbers = new int[portquantity];
 		
+		//m‰‰ritell‰‰n haluttavat portit joissa summauspalvelijat toimivat, sek‰ alustetaan summauspalvelijat
 		for(int i = 0; i<portquantity; i++) {
+			//valitaan portista 51000 alkaen serverin pyyt‰m‰ m‰‰r‰ portteja
 			int port = 51000 + i;
 			System.out.println("Port number "+(i+1)+ " = " + port);
+			//alustetaan uusi summauspalvelija ja tallennetaan viittaus taulukkoon
 			threads[i] = new SumServiceThread(port, i, sumOfThread, numberOfNumbers);
+			//kerrotaan serverille mist‰ portista summauspalvelijan lˆyt‰‰
 			oOut.writeInt(port);
 			oOut.flush();	
 			threads[i].start();
@@ -129,7 +130,7 @@ public class SumClient {
 		//kuunnellaan uteluita serverilt‰, ja odotetaan arvoja 1,2,3 tai 0
 		while(true) {
 			int action = oIn.readInt();
-			//asetetaan minuutin odotusaika, jos se ylittyy, suljetaan ohjelma
+			//asetetaan minuutin odotusaika yhteydenotolle, jos se ylittyy, suljetaan ohjelma
 			try {
 				clientSocket.setSoTimeout(60000);
 			}catch(Exception e) {
@@ -145,10 +146,11 @@ public class SumClient {
 			//jos serveri utelee numeron 1 kanssa, palautetaan t‰h‰n menness‰ v‰litettyjen lukujen kokonaissumma
 			if(action == 1) {
 				int sumOfSums=0;
+				//lasketaan summien kokonaisumma jaetusta taulukosta
 				for(int i=0; i<sumOfThread.length;i++) {
 					sumOfSums = sumOfSums + sumOfThread[i];
 				}
-				System.out.println("Summien summat: "+sumOfSums);
+				//v‰litet‰‰n tieto serverille
 				oOut.writeInt(sumOfSums);
 				oOut.flush();
 			}
@@ -157,34 +159,35 @@ public class SumClient {
 			else if(action==2) {
 				int biggestSum = sumOfThread[0];
 				int sumIndex = 1;
+				//etsit‰‰n suurimman summan omaava palvelija taulukosta
 				for(int i=0; i<threads.length;i++) {
 					if(biggestSum < sumOfThread[i]) {
 						biggestSum = sumOfThread[i];
 						sumIndex = i+1;
 					}
-					else {
-					}
 				}
-				System.out.println("Suurimman summan omaava palvelija: "+ sumIndex);
+				//v‰litet‰‰n tieto serverille
 				oOut.writeInt(sumIndex);
 				oOut.flush();
 			}
 			//jos serveri utelee numeron 3 kanssa, palautetaan kaikille summauspalvelimille v‰litettyjen lukujen kokonaism‰‰r‰
 			else if(action==3) {
 				int totalReceived = 0;
+				//lasketaan vastaanotettujen numeroiden yhteism‰‰r‰ jaetusta taulukosta
 				for(int i=0; i<numberOfNumbers.length;i++) {
 					totalReceived = totalReceived + numberOfNumbers[i];
 				}
-				System.out.println("Saatujen lukujen m‰‰r‰: "+ totalReceived);
+				//v‰litet‰‰n tieto serverille
 				oOut.writeInt(totalReceived);
 				oOut.flush();
 			}
 			//jos l‰hett‰‰ sovellukselle numeron 0, lopetetaan palveluiden k‰yttˆ ja suljetaan sovellus
 			else if(action==0) {
 				for(int i=0; i<threads.length;i++) {
+					//l‰hetet‰‰n threadeille k‰sky keskeytt‰‰ toiminta
 					threads[i].interrupt();
 				}
-				System.out.print("Summat: ");
+				System.out.print("Sums: ");
 				for(int i = 0; i<sumOfThread.length; i++) {
 					System.out.print(sumOfThread[i] + " ");
 				}
@@ -196,6 +199,9 @@ public class SumClient {
 			else {
 				oOut.writeInt(-1);
 				oOut.flush();
+				//jos serveri l‰hett‰‰ mit‰ sattuu, parempi lopettaa clientin toiminta
+				System.out.println("Error while communicating with server, client shutting down.");
+				break;
 			}
 			
 		}
