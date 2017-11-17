@@ -48,11 +48,18 @@ public class SumServiceThread extends Thread {
 			//k‰yd‰‰n objectinputstreamia niin kauan l‰pi kunnes saavutetaan 0
 			int nextNumber = oIn.readInt();
 			while(nextNumber != 0){
+				
 				setSumOfReceivedNumbers(getSumOfReceivedNumbers()+nextNumber);
 				setReceivedNumbers(getReceivedNumbers()+1);
 				//tallennetaan arvot jaettuihin taulukoihin, jotta sovellus pystyy vastaamaan serverin uteluihin
-				sumOfThread[index] = getSumOfReceivedNumbers();
-				numberOfNumbers[index] = getReceivedNumbers();
+				//varmistetaan, ett‰ vain yksi thread p‰‰see k‰siksi yhteen jaettuun taulukkoon kerralla
+				synchronized(sumOfThread) {
+					sumOfThread[index] = getSumOfReceivedNumbers();
+				}
+				//sama juttu kuin ylemp‰n‰
+				synchronized(numberOfNumbers) {
+					numberOfNumbers[index] = getReceivedNumbers();
+				}
 				nextNumber = oIn.readInt();
 			}
 			//kun 0 saavutetaan, suljetaan yhteys
