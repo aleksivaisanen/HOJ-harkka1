@@ -1,9 +1,8 @@
 # Hajautetut ohjelmistojärjestelmät ja pilvipalvelut -kurssin harjoitustyö nro. 1
 
-## Tehtävänanto:
-### Tehtävänä on tehdä sovellus X, joka tarjoaa lukujen summauspalvelua erikseen määritellyn palvelimen Y
-käyttöön. Palvelin Y on valmiiksi toteutettu ja sen yhteyteen on määritelty protokolla, jonka avulla
-summauspalvelua tarjoava sovellus X voi ottaa siihen yhteyttä. 
+## Eclipse-projekti
+
+### Tehtävänä on tehdä sovellus X, joka tarjoaa lukujen summauspalvelua erikseen määritellyn palvelimen Y käyttöön. Palvelin Y on valmiiksi toteutettu ja sen yhteyteen on määritelty protokolla, jonka avulla summauspalvelua tarjoava sovellus X voi ottaa siihen yhteyttä. 
 
 1. Sovellus X ottaa yhteyttä UDP-protokollalla palvelimen Y porttiin 3126 välittäen yhden
 UDP-paketin, joka sisältää TCP-portin numeron, johon palvelimen Y halutaan ottavan
